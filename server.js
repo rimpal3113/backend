@@ -1,4 +1,3 @@
-// backend/server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -38,7 +37,7 @@ app.use("/api/users", userRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "Server is running on Vercel!" });
+  res.json({ status: "ok", message: "Server is running!" });
 });
 
 // Database connection (singleton for serverless)
