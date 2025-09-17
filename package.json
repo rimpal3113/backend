@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
+    "vercel-start": "node server.js",
+    
      "seed:supplements": "node backend/seedSupplements.js"
   },
   "keywords": [],

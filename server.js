@@ -1,30 +1,27 @@
-// server.js
+// api/server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 
 // Import routes
-import authRoutes from "./routes/authRoutes.js";
-import memberRoutes from "./routes/memberRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import billsRoutes from "./routes/billsRoutes.js";
-import feePackageRoutes from "./routes/feePackageRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js";
-import reportRoutes from "./routes/reportRoutes.js";
-import supplementRoutes from "./routes/supplementRoutes.js";
-import dietPlanRoutes from "./routes/dietPlans.js";
-import userRoutes from "./routes/user.js";
+import authRoutes from "../routes/authRoutes.js";
+import memberRoutes from "../routes/memberRoutes.js";
+import adminRoutes from "../routes/adminRoutes.js";
+import billsRoutes from "../routes/billsRoutes.js";
+import feePackageRoutes from "../routes/feePackageRoutes.js";
+import notificationRoutes from "../routes/notificationRoutes.js";
+import reportRoutes from "../routes/reportRoutes.js";
+import supplementRoutes from "../routes/supplementRoutes.js";
+import dietPlanRoutes from "../routes/dietPlans.js";
+import userRoutes from "../routes/user.js";
 
-
-
-// Load environment variables
 dotenv.config();
 
 const app = express();
 
 // Middlewares
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: "*" })); // Allow all origins (change if needed)
 app.use(express.json());
 
 // Routes
@@ -38,16 +35,20 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/supplements", supplementRoutes);
 app.use("/api/dietplans", dietPlanRoutes);
 app.use("/api/users", userRoutes);
-// Database connection and server start
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
+
+// ✅ Database connection (singleton to avoid multiple connections in serverless)
+let isConnected = false;
+async function connectDB() {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    isConnected = true;
     console.log("✅ MongoDB connected");
-    app.listen(process.env.PORT || 5000, () => {
-      console.log(`🚀 Server running on http://localhost:${process.env.PORT || 5000}`);
-    });
-  })
-  .catch((err) => console.error("❌ DB connection error:", err));
+  } catch (err) {
+    console.error("❌ DB connection error:", err);
+  }
+}
+connectDB();
+
+// ✅ Export app as serverless function
+export default app;
