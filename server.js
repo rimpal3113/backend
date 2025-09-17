@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -15,12 +16,15 @@ import supplementRoutes from "./routes/supplementRoutes.js";
 import dietPlanRoutes from "./routes/dietPlans.js";
 import userRoutes from "./routes/user.js";
 
+
+
+// Load environment variables
 dotenv.config();
 
 const app = express();
 
 // Middlewares
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 
 // Routes
@@ -34,25 +38,16 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/supplements", supplementRoutes);
 app.use("/api/dietplans", dietPlanRoutes);
 app.use("/api/users", userRoutes);
-
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "Server is running!" });
-});
-
-// Database connection (singleton for serverless)
-let isConnected = false;
-async function connectDB() {
-  if (isConnected) return;
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    isConnected = true;
+// Database connection and server start
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
     console.log("✅ MongoDB connected");
-  } catch (err) {
-    console.error("❌ DB connection error:", err.message);
-  }
-}
-connectDB();
-
-// Export app for serverless
-export default app;
+    app.listen(process.env.PORT || 5000, () => {
+      console.log(`🚀 Server running on http://localhost:${process.env.PORT || 5000}`);
+    });
+  })
+  .catch((err) => console.error("❌ DB connection error:", err));
