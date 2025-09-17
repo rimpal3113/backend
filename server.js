@@ -38,6 +38,13 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/supplements", supplementRoutes);
 app.use("/api/dietplans", dietPlanRoutes);
 app.use("/api/users", userRoutes);
+
+app.get("/", (req, res) => {
+  res.send({
+    activeStatus: true,
+    error:false,
+  })
+});
 // Database connection and server start
 mongoose
   .connect(process.env.MONGO_URI, {
