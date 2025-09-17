@@ -21,7 +21,7 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(cors({ origin: "*" })); // Allow all origins (change if needed)
+app.use(cors({ origin: "*" })); // Allow all origins (or restrict to frontend domain)
 app.use(express.json());
 
 // Routes
@@ -36,7 +36,12 @@ app.use("/api/supplements", supplementRoutes);
 app.use("/api/dietplans", dietPlanRoutes);
 app.use("/api/users", userRoutes);
 
-// ✅ Database connection (singleton to avoid multiple connections in serverless)
+// ✅ Debug / Health route (optional but helps confirm deployment)
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", message: "Server is running on Vercel!" });
+});
+
+// ✅ Database connection (singleton for serverless)
 let isConnected = false;
 async function connectDB() {
   if (isConnected) return;
@@ -50,5 +55,6 @@ async function connectDB() {
 }
 connectDB();
 
-// ✅ Export app as serverless function
+// ❌ No app.listen() for Vercel
+// ✅ Export for serverless
 export default app;
